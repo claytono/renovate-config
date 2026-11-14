@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate settings shared by Clayton's repositories. Updates open on Monday mornings for manual review once a release is 14 days old; digest updates and pre-commit hook updates arrive on Thursday mornings. Both windows run from midnight through 11:59 AM Eastern, wide enough to catch at least one of Mend's best-effort runs, which start every few hours with no fixed time.",
+  "extends": [
+    "config:best-practices",
+    "github>claytono/renovate-docker-datasource"
+  ],
+  "timezone": "America/New_York",
+  "schedule": ["* 0-11 * * 1"],
+  "rebaseWhen": "behind-base-branch",
+  "automergeStrategy": "rebase",
+  "branchTopic": "{{{depNameSanitized}}}-{{{newVersion}}}{{#if isLockfileUpdate}}-lockfile{{/if}}",
+  "minimumReleaseAge": "14 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
+  "semanticCommits": "disabled",
+  "addLabels": ["renovate"],
+  "gitIgnoredAuthors": ["github-actions[bot]@users.noreply.github.com"],
+  "pre-commit": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "schedule": ["* 0-11 * * 1"]
+  },
+  "packageRules": [
+    {
+      "description": "Hold npm version updates for the same 14 days. config:best-practices sets 3 days for npm in a package rule, which would otherwise take precedence over the top-level wait.",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Auto-merge pre-commit hook updates if CI passes",
+      "matchManagers": ["pre-commit"],
+      "schedule": ["* 0-11 * * 4"],
+      "automerge": true
+    },
+    {
+      "description": "Auto-merge GitHub Actions digest updates if CI passes. Limited to actions and reusable workflows: the manager also finds workflow container and service images, which the Docker digest rule covers.",
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action", "workflow"],
+      "matchUpdateTypes": ["digest"],
+      "minimumReleaseAge": "0 days",
+      "schedule": ["* 0-11 * * 4"],
+      "automerge": true
+    },
+    {
+      "description": "Offer Docker digest updates on Thursdays without waiting. Whether one merges automatically is up to each repository, which knows which of its files CI tests or deploys.",
+      "matchDatasources": ["docker", "custom.docker-first-seen"],
+      "matchUpdateTypes": ["digest"],
+      "minimumReleaseAge": "0 days",
+      "schedule": ["* 0-11 * * 4"]
+    },
+    {
+      "description": "Do not pin the reusable Renovate evaluation workflow; it intentionally tracks main",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["claytono/github-actions"],
+      "matchUpdateTypes": ["pinDigest"],
+      "enabled": false
+    }
+  ]
+}
