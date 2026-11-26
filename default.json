@@ -8,6 +8,7 @@
   "timezone": "America/New_York",
   "schedule": ["* 0-11 * * 1"],
   "rebaseWhen": "behind-base-branch",
+  "postUpdateOptions": ["gomodTidy"],
   "automergeStrategy": "rebase",
   "branchTopic": "{{{depNameSanitized}}}-{{{newVersion}}}{{#if isLockfileUpdate}}-lockfile{{/if}}",
   "minimumReleaseAge": "14 days",
